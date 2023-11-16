@@ -1,0 +1,112 @@
+/* Create tables about celebrities */
+
+CREATE TABLE celebrities ( id INTEGER PRIMARY KEY AUTOINCREMENT, 
+fullname TEXT,
+category TEXT,
+gender TEXT, 
+age INTEGER,
+country_of_birth TEXT);
+
+CREATE TABLE popularity( id INTEGER PRIMARY KEY AUTOINCREMENT, 
+celeb_id INTEGER, 
+net_worth INTEGER,
+twitter_followers INTEGER, 
+instagram_followers INTEGER );
+
+CREATE TABLE notable_works( id INTEGER PRIMARY KEY AUTOINCREMENT, 
+celeb_id INTEGER,
+category TEXT, 
+title TEXT);
+
+/* Insert information into tables */
+
+INSERT INTO celebrities( fullname, category, gender, age, country_of_birth ) VALUES( "Taylor Swift", "Music Artist", "Female", 33, "United States");
+
+INSERT INTO celebrities( fullname, category, gender, age, country_of_birth ) VALUES( "Josh Hutcherson", "Actor", "Male", 31, "United States");
+
+INSERT INTO celebrities( fullname, category, gender, age, country_of_birth ) VALUES( "Adam Sandler", "Actor", "Male", 57, "United States");
+
+INSERT INTO celebrities( fullname, category, gender, age, country_of_birth ) VALUES( "Suzanne Collins", "Author", "Female", 61, "United States");
+
+INSERT INTO celebrities( fullname, category, gender, age, country_of_birth ) VALUES( "Tate McRae", "Music Artist", "Female", 20, "Canada");
+
+INSERT INTO celebrities( fullname, category, gender, age, country_of_birth ) VALUES( "John Green", "Author", "Male", 46, "United States");
+
+INSERT INTO celebrities( fullname, category, gender, age, country_of_birth ) VALUES( "Justin Bieber", "Music Artist", "Male", 29, "Canada");
+
+INSERT INTO celebrities( fullname, category, gender, age, country_of_birth ) VALUES( "Jason Kelce", "Athlete", "Male", 36, "United States");
+
+INSERT INTO celebrities( fullname, category, gender, age, country_of_birth ) VALUES( "Simone Biles", "Athlete", "Female", 26, "United States");
+
+INSERT INTO celebrities( fullname, category, gender,age, country_of_birth ) VALUES( "Courteney Cox", "Actor", "Female", 59, "United States");
+
+INSERT INTO popularity( celeb_id, net_worth,
+twitter_followers, instagram_followers ) VALUES(1, 1000000000, 9400000, 2770000);
+
+INSERT INTO popularity( celeb_id, net_worth,
+twitter_followers, instagram_followers ) VALUES(2, 20000000, 2100000, 1000000);
+
+INSERT INTO popularity( celeb_id, net_worth,
+twitter_followers, instagram_followers ) VALUES(3, 420000000, 3200000, 21000000);
+
+INSERT INTO popularity( celeb_id, net_worth,
+twitter_followers, instagram_followers ) VALUES(4, 90000000, 0, 0);
+
+INSERT INTO popularity( celeb_id, net_worth,
+twitter_followers, instagram_followers ) VALUES(5, 4000000, 130000, 3000000);
+
+INSERT INTO popularity( celeb_id, net_worth,
+twitter_followers, instagram_followers ) VALUES(6, 17000000, 4500000, 2100000);
+
+INSERT INTO popularity( celeb_id, net_worth,
+twitter_followers, instagram_followers ) VALUES(7, 300000000, 111000000, 293000000 );
+
+INSERT INTO popularity( celeb_id, net_worth,
+twitter_followers, instagram_followers ) VALUES(8, 40000000,311000, 1000000);
+
+INSERT INTO popularity( celeb_id, net_worth,
+twitter_followers, instagram_followers ) VALUES(9, 16000000, 1600000,7000000);
+
+INSERT INTO popularity( celeb_id, net_worth,
+twitter_followers, instagram_followers ) VALUES(10, 150000000, 1300000, 14000000);
+
+INSERT INTO notable_works( celeb_id, category, title ) VALUES (1, "Song", "Blank Space");
+
+INSERT INTO notable_works( celeb_id, category, title ) VALUES (2, "Movie", "The Hunger Games");
+
+INSERT INTO notable_works( celeb_id, category, title ) VALUES (3, "Movie", "The Wedding Singer");
+
+INSERT INTO notable_works( celeb_id, category, title ) VALUES (4, "Book", "The Hunger Games");
+
+INSERT INTO notable_works( celeb_id, category, title ) VALUES (5, "Song", "Greedy");
+
+INSERT INTO notable_works( celeb_id, category, title ) VALUES (6, "Book", "The Fault in Our Stars");
+
+INSERT INTO notable_works( celeb_id, category, title ) VALUES (7, "Song", "Baby");
+
+INSERT INTO notable_works( celeb_id, category, title ) VALUES (8, "Athletic Team", "Eagles");
+
+INSERT INTO notable_works( celeb_id, category, title ) VALUES (9, "Athletic Team", "Team USA");
+
+INSERT INTO notable_works( celeb_id, category, title ) VALUES (10, "TV Show", "Friends");
+
+
+/* find the songs canadian born singers have */
+SELECT celebrities.fullname, notable_works.category, notable_works.title FROM celebrities JOIN notable_works ON celebrities.id = notable_works.celeb_id WHERE celebrities.country_of_birth = "Canada";
+
+/* celebs with over 2 million instagram followers
+and a networth over 5 million
+*/
+SELECT celebrities.fullname FROM celebrities JOIN popularity ON celebrities.id = popularity.celeb_id WHERE popularity.instagram_followers > 2000000 AND popularity.net_worth > 5000000;
+
+/* actors and their avg networth */
+SELECT AVG(popularity.net_worth) AS avg_networth FROM celebrities JOIN
+popularity ON celebrities.id = popularity.celeb_id WHERE celebrities.category="Actor";
+
+/* noteable works of celebs from US over 30 who have over 4 mil twitter(X) followers */
+SELECT celebrities.fullname, notable_works.title FROM celebrities 
+JOIN notable_works ON celebrities.id = notable_works.celeb_id 
+JOIN popularity ON celebrities.id = popularity.celeb_id 
+WHERE celebrities.age > 30 
+AND celebrities.country_of_birth = "United States" 
+AND popularity.twitter_followers > 4000000;
