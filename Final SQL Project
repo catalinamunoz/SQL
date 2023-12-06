@@ -1,0 +1,98 @@
+# Querying the chinook database with 11 different tables to quantify statistics about song, order, and media data
+
+--  #1. invoices from customers in france & USA who spent the most to least $
+SELECT * FROM chinook.invoices 
+WHERE BillingCountry = 'France' OR BillingCountry = 'USA'
+ORDER BY Total DESC;
+
+-- # 2. total sales from Brazil in 2010
+SELECT SUM(Total) AS total_spent FROM chinook.invoices 
+WHERE BillingCountry = 'Brazil' AND InvoiceDate 
+BETWEEN '2010-01-01' AND '2010-12-31';
+
+-- # 3. how many albums does each artist have from most to least
+SELECT artist.name, COUNT(*) as num_albums
+FROM chinook.albums album 
+JOIN chinook.artists artist ON album.ArtistId = artist.ArtistId 
+GROUP BY artist.Name 
+ORDER BY num_albums DESC;
+
+-- # 4. customers that purchsed more than $40 worth of music
+SELECT cust.FirstName, cust.LastName, SUM(invoice.Total) AS total_spent FROM chinook.customers cust 
+JOIN chinook.invoices invoice
+ON cust.CustomerId = invoice.CustomerId 
+GROUP BY cust.FirstName, cust.LastName
+HAVING total_spent > 40;
+
+-- # 5. same problem, using CTE
+WITH total_spent_cte AS (
+    SELECT c.FirstName, c.LastName,SUM(i.Total) AS total_spent
+    FROM customers c
+    JOIN invoices i ON c.CustomerId = i.CustomerId
+    GROUP BY c.CustomerId, c.FirstName, c.LastName
+)
+SELECT FirstName, LastName, total_spent
+FROM total_spent_cte
+WHERE total_spent >= 40;
+
+-- # 6. employees that have IT jobs and calculate their age based on their birthday
+SELECT FirstName, LastName, Title, STRFTIME('%Y', 'now') - STRFTIME('%Y', BirthDate) AS age 
+FROM chinook.employees
+WHERE Title LIKE 'IT%';
+
+-- # 7. list all the pop songs 
+SELECT genre.Name AS genre, track.Name AS song
+ FROM chinook.genres genre JOIN chinook.tracks track ON 
+genre.GenreId = track.GenreId
+WHERE genre = 'Pop';
+
+-- # 8. show customers based on their continent
+SELECT FirstName, LastName, CASE
+WHEN Country = 'Canada' THEN 'Domestic Customer'
+WHEN Country = 'USA' THEN 'North American Customer'
+WHEN Country = 'India' THEN 'Asia'
+WHEN Country IN ('Australia', 'New Zealand') THEN 'Oceania Customer'
+WHEN Country IN ('Germany', 'Norway', 'Czech Republic', 'Austria', 
+'Belgium', 'Denmark', 'France', 'Finland', 'Hungary', 'Portugal', 'Ireland', 
+'Italy', 'Netherlands', 'Poland', 'Spain', 'Sweden', 'United Kingdom') 
+THEN 'European Customer'
+WHEN Country IN ('Chile', 'Brazil', 'Argentina') THEN 'South American Customer'
+ELSE 'Other'
+END AS CustomerCategory FROM chinook.customers;
+
+-- # 9. all songs in the Music playlist
+SELECT playlist.Name AS playlist_name, song.Name AS song_name FROM playlist_track play_track
+JOIN playlists playlist
+ON play_track.PlaylistID = playlist.PlaylistID
+JOIN tracks song ON play_track.TrackId = song.TrackId
+WHERE play_track.PlaylistId = '1';
+
+-- # 10. show songs if their media types are MPEG audio file or AAC audio file
+SELECT songs.Name AS song, type.Name AS media_type 
+FROM chinook.tracks songs
+JOIN chinook.media_types type 
+ON songs.MediaTypeId = songs.MediaTypeId
+WHERE media_type IN ('MPEG audio file', 'AAC audio file');
+
+-- # 11. when and where AC/DC songs were purchased and their prices
+SELECT inv_i.TrackId, t.Name AS track, 
+t.Composer, t.UnitPrice, inv.InvoiceDate, 
+inv.BillingCity
+FROM chinook.invoice_items inv_i
+JOIN chinook.invoices inv ON inv_i.InvoiceId = inv.InvoiceId
+JOIN chinook.tracks t ON inv_i.TrackId = t.TrackId
+WHERE Composer = 'AC/DC';
+
+-- # 12. songs and the album they belong to
+SELECT t.Name AS track_name, t.Composer, a.Title AS album 
+FROM chinook.tracks t 
+JOIN chinook.albums a 
+ON t.AlbumId = a.AlbumId 
+ORDER BY t.trackId;
+
+-- # 13. total money spent in each country from most to least
+SELECT BillingCountry, SUM(Total) AS country_revenue
+FROM chinook.invoices
+GROUP BY BillingCountry
+ORDER BY country_revenue DESC;
+
